@@ -1,0 +1,12 @@
+[
+  {
+    "id": "resume-1",
+    "title": "Frontend engineer",
+    "skills": ["TypeScript", "React", "accessibility"]
+  },
+  {
+    "id": "resume-2",
+    "title": "Backend engineer",
+    "skills": ["Python", "Django", "PostgreSQL"]
+  }
+]
