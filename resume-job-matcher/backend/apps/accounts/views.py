@@ -1,9 +1,7 @@
-from rest_framework.viewsets import ReadOnlyModelViewSet
+from rest_framework import generics
+from rest_framework.permissions import AllowAny
+from .serializers import RegisterSerializer
 
-
-class AccountViewSet(ReadOnlyModelViewSet):
-    """Account endpoints will be implemented with the user model."""
-
-    queryset = []
-
-# Create your views here.
+class RegisterView(generics.CreateAPIView):
+    serializer_class = RegisterSerializer
+    permission_classes = [AllowAny] # Anyone (even unauthenticated) can register
