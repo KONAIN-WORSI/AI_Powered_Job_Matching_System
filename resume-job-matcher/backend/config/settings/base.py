@@ -34,6 +34,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -93,4 +94,6 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),  # Token valid for 1 day
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7), # Refresh token valid for 1 week
+    # Use a dedicated key so JWT signing does not depend on a short Django key.
+    'SIGNING_KEY': env('JWT_SIGNING_KEY', default=SECRET_KEY),
 }

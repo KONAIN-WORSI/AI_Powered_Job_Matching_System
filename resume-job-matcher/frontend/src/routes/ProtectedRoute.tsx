@@ -1,10 +1,13 @@
 import { Navigate } from 'react-router-dom'
 import type { PropsWithChildren } from 'react'
+import { useAuth } from '../hooks/useAuth'
+import type { UserRole } from '../types/user'
 
-interface ProtectedRouteProps extends PropsWithChildren {
-  isAuthenticated: boolean
-}
-
-export function ProtectedRoute({ isAuthenticated, children }: ProtectedRouteProps) {
-  return isAuthenticated ? children : <Navigate replace to="/login" />
+export function ProtectedRoute({ children, allowedRole }: PropsWithChildren<{ allowedRole?: UserRole }>) {
+  const { isAuthenticated, role } = useAuth()
+  if (!isAuthenticated) return <Navigate replace to="/login" />
+  if (allowedRole && role !== allowedRole) {
+    return <Navigate replace to={role === 'employer' ? '/employer' : '/dashboard'} />
+  }
+  return children
 }
