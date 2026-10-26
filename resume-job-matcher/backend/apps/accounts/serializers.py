@@ -9,92 +9,84 @@ from django.contrib.auth import authenticate, get_user_model
 User = get_user_model()
 
 class RegisterSerializer(serializers.ModelSerializer):
-    # Add fields that aren't in the default User model
-    full_name = serializers.CharField(write_only=True, required=False)
-    company_name = serializers.CharField(write_only=True, required=False)
-    job_title = serializers.CharField(write_only=True, required=False)
-    
-    password = serializers.CharField(write_only=True)
+   full_name = serializers.CharField(write_only=True, required=False)
+   company = serializers.CharField(write_only=True, required=False)
+   job_title = serializers.CharField(write_only=True, required=False)
 
-    class Meta:
-        model = User
-        fields = ('id', 'email', 'password', 'role', 'full_name', 'company_name', 'job_title')
+   password = serializers.CharField(write_only=True)
+   role = serializers.CharField(write_only=True)
 
-
-    def validate_role(self, value):
-        # Fix D: Prevent users from registering as 'admin'
-        if value not in ['job_seeker', 'employer']:
-            raise serializers.ValidationError("Invalid role selected.")
-        return value
+   class Meta:
+      model = User
+      fields = ['email', 'password', 'full_name', 'company', 'job_title', 'role']
 
 
-    def validate(self, attrs):
-        # Fix C: Require company_name if role is employer
-        if attrs.get('role') == 'employer' and not attrs.get('company_name'):
-            raise serializers.ValidationError({"company_name": "Company name is required for employers."})
-        return attrs
-    
-
-    @transaction.atomic
-    def create(self, validated_data):
-        # Fix B: Normalize email to lowercase
-        email = validated_data['email'].lower()
-        
-        # Extract profile data
+   @transaction.atomic
+   def create(self, validated_data):
         full_name = validated_data.pop('full_name', '')
-        company_name = validated_data.pop('company_name', '')
         job_title = validated_data.pop('job_title', '')
-        role = validated_data.get('role')
+        company = validated_data.pop('company', '')
 
-        # Create User
+        email = validated_data['email'].lower()
+        role = validated_data['role']
+        company_obj = None
+        company_name = company.strip()
+
+        if role == 'employer' and company_name:
+            company_obj, _ = Company.objects.get_or_create(name=company_name)
+
         user = User.objects.create_user(
             email=email,
             password=validated_data['password'],
             role=role
         )
 
-        # Fix F: Explicitly create profiles (No hidden signals)
         if role == 'job_seeker':
-            JobSeekerProfile.objects.update_or_create(
+            JobSeekerProfile.objects.create(
                 user=user,
-                defaults={'full_name': full_name},
+                full_name=full_name
             )
         elif role == 'employer':
-            company, _ = Company.objects.get_or_create(name=company_name, defaults={'country': 'NP'})
-            EmployerProfile.objects.update_or_create(
+            EmployerProfile.objects.create(
                 user=user,
-                defaults={'company': company, 'job_title': job_title},
+                company=company_obj,
+                job_title=job_title
             )
 
         return user
     
 
 class CustomLoginSerializer(TokenObtainPairSerializer):
-    email = serializers.EmailField(write_only=True)
-    password = serializers.CharField(write_only=True)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields.pop(User.USERNAME_FIELD, None)
-
     def validate(self, attrs):
-        # Resolve the email to the account username, then authenticate normally.
+        # The incoming data from React will be in 'attrs'
+        # Example: {"email": "john@example.com", "password": "password123"}
+        
+        # 1. Get the email and password from attrs
+        email = attrs.get('email')
+        password = attrs.get('password')
+        
+        # 2. Look up the user in the database (use __iexact to ignore case)
         try:
-            account = User.objects.get(email__iexact=attrs['email'])
+            user = User.objects.get(email__iexact=email)
         except User.DoesNotExist:
-            raise AuthenticationFailed('No active account found with the given credentials')
-
-        user = authenticate(
-            request=self.context.get('request'),
-            username=account.get_username(),
-            password=attrs['password'],
-        )
-        if user is None:
-            raise AuthenticationFailed('No active account found with the given credentials')
-
-        refresh = self.get_token(user)
+            raise AuthenticationFailed("No active account found with the given credentials")
+            
+        # 3. Authenticate the user (check if password is correct)
+        # Hint: Use Django's authenticate() function. 
+        # Because we use email now, username=user.email
+        authenticated_user = authenticate(username=user.email, password=password)
+        
+        # 4. If authentication fails, raise an error
+        if not authenticated_user:
+            raise AuthenticationFailed("Invalid password")
+            
+        # 5. Generate the tokens
+        # Hint: Look at the parent class. It has a method called self.get_token(user)
+        refresh = self.get_token(authenticated_user)
+        
+        # 6. Return the tokens and the role
         return {
             'refresh': str(refresh),
             'access': str(refresh.access_token),
-            'role': user.role,
-        }
+            'role': authenticated_user.role # Get the user's role
+      }

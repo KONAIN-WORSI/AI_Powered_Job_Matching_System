@@ -36,50 +36,49 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
     objects = UserManager()
 
-    ROLE_CHOICES = (
+    ROLE_CHOICES  = [
         ('job_seeker', 'Job Seeker'),
         ('employer', 'Employer'),
-        ('admin', 'Admin'),
-    )
-    # We add the role field
+        ('admin', 'Admin')
+    ]
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='job_seeker')
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
     def __str__(self):
-        return f"{self.email} ({self.role})"
+        return self.email
 
 
 class Company(models.Model):
     name = models.CharField(max_length=100)
-    industry = models.CharField(max_length=50, null=True, blank=True)
-    country = models.CharField(max_length=2)
-    city = models.CharField(max_length=50)
-    size = models.CharField(max_length=50, blank=True, null=True)
+    industry = models.CharField(max_length=100, blank=True, null=True)
+    country = models.CharField(max_length=2, blank=True, null=True)
+    city = models.CharField(max_length=100, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
+    size = models.CharField(max_length=50, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.name
+        return f"{self.name}"
 
 
 class JobSeekerProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='job_seeker_profile')
-    full_name = models.CharField(max_length=150, blank=True, null=True)
-    headline = models.CharField(max_length=200, blank=True, null=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    full_name = models.CharField(max_length=100)
+    headline = models.CharField(max_length=100, blank=True, null=True)
     country = models.CharField(max_length=2, blank=True, null=True)
     city = models.CharField(max_length=100, blank=True, null=True)
-    years_experience = models.SmallIntegerField(blank=True, null=True)
+    years_experience = models.IntegerField()
 
     def __str__(self):
-        return f"{self.user.username}'s Seeker Profile"
+        return f'{self.user.email} - Job Seeker Profiles'
 
 
 class EmployerProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='employer_profile')
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True, blank=True)
     job_title = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
-        return f"{self.user.username}'s Employer Profile"
+        return f"{self.user.email} - Employers Profile"
