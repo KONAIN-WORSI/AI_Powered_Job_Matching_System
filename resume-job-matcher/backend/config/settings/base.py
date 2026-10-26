@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
     'apps.accounts.apps.AccountsConfig',
     'apps.resumes.apps.ResumesConfig',
@@ -96,4 +97,6 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7), # Refresh token valid for 1 week
     # Use a dedicated key so JWT signing does not depend on a short Django key.
     'SIGNING_KEY': env('JWT_SIGNING_KEY', default=SECRET_KEY),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
 }

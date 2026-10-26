@@ -90,3 +90,7 @@ class CustomLoginSerializer(TokenObtainPairSerializer):
             'access': str(refresh.access_token),
             'role': authenticated_user.role # Get the user's role
       }
+
+
+class LogOutSerializer(serializers.Serializer):
+    refresh = serializers.CharField(required=True, write_only=True)

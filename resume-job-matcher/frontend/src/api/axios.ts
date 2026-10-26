@@ -15,7 +15,10 @@ export const apiClient = axiosClient;
 axiosClient.interceptors.request.use((config) => {
   // Auth endpoints must remain public even when the browser has a stale token.
   // This also avoids sending an old JWT after the signing key is rotated.
-  if (config.url?.startsWith('/auth/')) {
+  if (
+    config.url?.startsWith('/auth/') &&
+    !config.url.startsWith('/auth/logout/')
+  ) {
     return config;
   }
 

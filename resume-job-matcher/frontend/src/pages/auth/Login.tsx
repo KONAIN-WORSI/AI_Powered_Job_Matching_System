@@ -15,6 +15,7 @@ export default function Login() {
   const navigate = useNavigate()
   const location = useLocation()
   const registered = (location.state as { registered?: boolean } | null)?.registered
+  const logoutError = (location.state as { logoutError?: boolean } | null)?.logoutError
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -47,6 +48,7 @@ export default function Login() {
       <section className="auth-card auth-card-login">
         <AuthIntro title="Welcome back" subtitle="Sign in to find your next opportunity." />
         {registered && <p className="auth-success" role="status">Your account is ready. Sign in to continue.</p>}
+        {logoutError && <p className="auth-error" role="alert">You were signed out on this device, but the server could not confirm that your refresh token was revoked.</p>}
         <form className="auth-form" onSubmit={handleSubmit}>
           <AuthField label="Email" type="email" autoComplete="email" placeholder="you@example.com" value={email} onChange={(event) => setEmail(event.target.value)} required />
           <label className="auth-field">

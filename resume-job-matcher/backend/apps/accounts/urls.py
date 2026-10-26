@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import RegisterView, CustomLoginView
+from .views import RegisterView, CustomLoginView, LogOutView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
@@ -11,4 +11,7 @@ urlpatterns = [
     
     # Refresh (Takes a refresh token, returns a new access token)
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+
+    # Logout path to remove the refresh token from the browser local storage
+    path('logout/', LogOutView.as_view(), name='logout'),
 ]
