@@ -30,6 +30,8 @@ INSTALLED_APPS = [
     'apps.jobs.apps.JobsConfig',
     'apps.matching.apps.MatchingConfig',
     'apps.employers.apps.EmployersConfig',
+    'cloudinary_storage',
+    'cloudinary',
 ]
 
 MIDDLEWARE = [
@@ -99,4 +101,42 @@ SIMPLE_JWT = {
     'SIGNING_KEY': env('JWT_SIGNING_KEY', default=SECRET_KEY),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
+}
+
+CLOUD_NAME = os.getenv('CLOUD_NAME', default='')
+CLOUDINARY_API_KEY = os.getenv('CLOUDINARY_API_KEY', default='')
+CLOUDINARY_API_SECRET = os.getenv('CLOUDINARY_API_SECRET', default='')
+
+
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.RawMediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "standard": {
+            "format": "%(asctime)s %(levelname)s %(name)s: %(message)s",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "standard",
+            "level": "ERROR",
+        },
+    },
+    "loggers": {
+        "apps.resumes.views": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+    },
 }

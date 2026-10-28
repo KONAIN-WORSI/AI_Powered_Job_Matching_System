@@ -44,7 +44,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         if role == 'job_seeker':
             JobSeekerProfile.objects.create(
                 user=user,
-                full_name=full_name
+                full_name=full_name,
+                years_experience=0
             )
         elif role == 'employer':
             EmployerProfile.objects.create(

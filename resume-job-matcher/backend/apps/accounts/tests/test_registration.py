@@ -1,7 +1,21 @@
 from django.test import TestCase
 
-from apps.accounts.models import Company, EmployerProfile
+from apps.accounts.models import Company, EmployerProfile, JobSeekerProfile
 from apps.accounts.serializers import RegisterSerializer
+
+
+class JobSeekerRegistrationTests(TestCase):
+    def test_registration_starts_job_seeker_with_zero_years_experience(self):
+        RegisterSerializer().create({
+            'email': 'jobseeker@example.com',
+            'password': 'test-password-123',
+            'role': 'job_seeker',
+            'full_name': 'Konain Worsi',
+        })
+
+        profile = JobSeekerProfile.objects.get(user__email='jobseeker@example.com')
+        self.assertEqual(profile.full_name, 'Konain Worsi')
+        self.assertEqual(profile.years_experience, 0)
 
 
 class EmployerRegistrationTests(TestCase):
