@@ -1,14 +1,6 @@
-import { createContext, useState, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { apiClient } from '../api/axios';
-
-interface AuthContextType {
-  isAuthenticated: boolean;
-  login: (access: string, refresh: string, role: string) => void;
-  logout: () => Promise<void>;
-  role: string | null;
-}
-
-export const AuthContext = createContext<AuthContextType | null>(null);
+import { AuthContext } from './authContextValue';
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
@@ -16,10 +8,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
   const [role, setRole] = useState<string | null>(() => localStorage.getItem('user_role'));
 
-  const login = (access: string, refresh: string, userRole: string) => {
+  const login = (access: string, refresh: string, userRole: string, email: string) => {
     localStorage.setItem('access_token', access);
     localStorage.setItem('refresh_token', refresh);
     localStorage.setItem('user_role', userRole);
+    localStorage.setItem('user_email', email);
     setIsAuthenticated(true);
     setRole(userRole);
   };
@@ -35,6 +28,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('user_role');
+      localStorage.removeItem('user_email');
       setIsAuthenticated(false);
       setRole(null);
     }

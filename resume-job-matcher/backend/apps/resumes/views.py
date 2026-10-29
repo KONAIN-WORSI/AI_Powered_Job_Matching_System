@@ -1,5 +1,3 @@
-import logging
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -9,9 +7,6 @@ from .models import Resume
 from apps.accounts.models import JobSeekerProfile
 from .services import process_resume_file
 from .serializers import ResumeUploadSerializer, ResumeDetailSerializer
-
-logger = logging.getLogger(__name__)
-
 
 class ResumeUploadView(APIView):
     permission_classes = [IsAuthenticated, IsJobSeeker]
@@ -33,6 +28,9 @@ class ResumeUploadView(APIView):
 
         try:
             ml_data = process_resume_file(file_obj)
+            
+            # Rewind the uploaded file after parsing it.
+            file_obj.seek(0)
 
             if is_primary:
                 Resume.objects.filter(job_seeker=job_seeker).update(is_primary=False)
@@ -42,8 +40,8 @@ class ResumeUploadView(APIView):
                 file=file_obj,
                 is_primary=is_primary,
                 **ml_data,
-            )
-
+                )
+            
             return Response(
                 {
                     "message": "Successfully uploaded the resume",
@@ -58,7 +56,6 @@ class ResumeUploadView(APIView):
 
         except Exception:
             # Catch all other unexpected errors
-            logger.exception("Unexpected error while processing resume upload")
             return Response(
                 {"error": "An internal error occurred during processing."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,

@@ -1,7 +1,7 @@
 import { useContext, useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import { AuthContext } from '../../context/AuthContext'
+import { AuthContext } from '../../context/authContextValue'
 import axiosClient from '../../api/axios'
 import { AuthField, AuthIntro, AuthPageShell } from './AuthPageShell'
 
@@ -24,7 +24,7 @@ export default function Login() {
     try {
       const response = await axiosClient.post('/auth/login/', { email: email.trim().toLowerCase(), password })
       const { access, refresh, role } = response.data
-      auth?.login(access, refresh, role)
+      auth?.login(access, refresh, role, email.trim().toLowerCase())
       navigate(role === 'employer' ? '/employer' : '/dashboard')
     } catch (requestError) {
       if (axios.isAxiosError(requestError)) {

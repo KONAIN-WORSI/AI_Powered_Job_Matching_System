@@ -7,7 +7,7 @@ from cloudinary_storage.storage import MediaCloudinaryStorage
 class Resume(models.Model):
     job_seeker = models.ForeignKey(JobSeekerProfile, on_delete=models.CASCADE)
 
-    file = models.FileField(upload_to='resumes/', storage=MediaCloudinaryStorage(resource_type='raw'))
+    file = models.FileField(upload_to='resumes/', storage=MediaCloudinaryStorage())
 
     raw_text = models.TextField()
     extracted_skills = models.JSONField(default=list)

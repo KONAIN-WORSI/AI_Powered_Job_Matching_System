@@ -1,9 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import {ProtectedRoute} from './routes/ProtectedRoute';
+import { ProtectedRoute } from './routes/ProtectedRoute';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import Dashboard from './pages/jobseeker/Dashboard';
+import ResumeUploadPage from './pages/jobseeker/ResumeUpload';
 import EmployerDashboard from './pages/employer/Dashboard';
 
 export default function App() {
@@ -13,6 +14,14 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute allowedRole="job_seeker">
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
           <Route 
             path="/dashboard" 
             element={
@@ -20,6 +29,14 @@ export default function App() {
                 <Dashboard />
               </ProtectedRoute>
             } 
+          />
+          <Route
+            path="/resume"
+            element={
+              <ProtectedRoute allowedRole="job_seeker">
+                <ResumeUploadPage />
+              </ProtectedRoute>
+            }
           />
           <Route
             path="/employer"
